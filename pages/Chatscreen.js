@@ -1,55 +1,95 @@
-import React, { useEffect, useState,useRef } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import React, { useEffect, useState, useRef } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  ScrollView,
+  BackHandler,
+} from "react-native";
 
-import { io } from 'socket.io-client';
+import { io } from "socket.io-client";
 
-const ChatScreen = () => {
+const ChatScreen = ({ route }) => {
+  const { name, room } = route.params;
+  console.log(name, room);
   const [messages, setMessages] = useState([]);
-  const [newMessage, setNewMessage] = useState('');
-  const [typername,settypername] = useState(null)
+  const [newMessage, setNewMessage] = useState("");
+  const [typername, settypername] = useState(null);
 
-    const socketRef = useRef(null)
-    let activityTimer = useRef(null)
+  const socketRef = useRef(null);
+  let activityTimer = useRef(null);
 
-  useEffect(()=>{
-        socketRef.current = io('ws://192.168.1.20:3500')
-        
+  useEffect(() => {
+    const backAction = () => {
+      console.log("back pressed");
+      console.log(socketRef.current);
+      if (socketRef.current) {
+        socketRef.current.emit("forcedisconnect");
+        console.log(" pressed");
+      }
+      return true;
+    };
 
-        // socketRef.current.on('connection', () => {
-        //     console.log('Connected to server');
-        //   });
-          
-          console.log((socketRef.current))
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
 
-          socketRef.current.on('message', (data) => {
-            setMessages(prevMessages => [...prevMessages, { text: data, sender: 'user' }]);
-            console.log('Received message:', data);
-          });
+    return () => backHandler.remove();
+  }, []);
 
+  useEffect(() => {
+    socketRef.current = io("ws://192.168.1.18:3500");
 
-          socketRef.current.on("activity",(name)=>{
-            settypername(name)
-            clearTimeout(activityTimer)
-            activityTimer = setTimeout(()=>{
-                settypername(null)
-            },2000)
-          })
+    // socketRef.current.on('connection', () => {
+    //     console.log('Connected to server');
+    //   });
 
-          // Disconnect when the component unmounts
-          return () => {
-            if (socketRef.current) {
-              socketRef.current.on('disconnect');
-            }
-          };
-  },[])
+    console.log(socketRef.current);
+    socketRef.current.emit("enterRoom", {
+      name: name,
+      room: room,
+    });
+
+    socketRef.current.on("message", (data) => {
+      if (data.name != "Admin") {
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          { text: data.text, sender: "user" },
+        ]);
+      } else {
+        console.log(data.text);
+      }
+      console.log("Received message:", data);
+    });
+
+    socketRef.current.on("activity", (name) => {
+      settypername(name);
+      clearTimeout(activityTimer);
+      activityTimer = setTimeout(() => {
+        settypername(null);
+      }, 2000);
+    });
+
+    // Disconnect when the component unmounts
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.on("disconnect");
+      }
+    };
+  }, []);
 
   const handleSend = () => {
-    if (newMessage.trim() !== '') {
+    if (newMessage.trim() !== "") {
       if (socketRef.current) {
-        socketRef.current.emit('message', newMessage);
-       
+        socketRef.current.emit("message", {
+          name: name,
+          text: newMessage,
+        });
       }
-      setNewMessage('');
+      setNewMessage("");
     }
   };
 
@@ -57,26 +97,30 @@ const ChatScreen = () => {
     <View style={styles.container}>
       <ScrollView style={styles.messagesContainer}>
         {messages.map((msg, index) => (
-          <View key={index} style={msg.sender === 'user' ? styles.userMessage : styles.otherMessage}>
+          <View
+            key={index}
+            style={
+              msg.sender === "user" ? styles.userMessage : styles.otherMessage
+            }
+          >
             <Text style={styles.messageText}>{msg.text}</Text>
           </View>
         ))}
       </ScrollView>
-      {
-            typername !=null ?        <Text>{typername}is typing</Text>:""
-        }
+      {typername != null ? <Text>{typername}is typing</Text> : ""}
 
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
           placeholder="Type your message..."
           value={newMessage}
-          onChangeText={(text) => {setNewMessage(text)
+          onChangeText={(text) => {
+            setNewMessage(text);
 
-            socketRef.current.emit("activity",socketRef.current.id.substring(0,5))
-        }}
+            socketRef.current.emit("activity", name);
+          }}
         />
-        
+
         <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
           <Text style={styles.sendButtonText}>Send</Text>
         </TouchableOpacity>
@@ -88,55 +132,55 @@ const ChatScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'flex-end',
+    justifyContent: "flex-end",
   },
   messagesContainer: {
     flex: 1,
     padding: 10,
   },
   userMessage: {
-    alignSelf: 'flex-end',
-    backgroundColor: '#4CAF50',
+    alignSelf: "flex-end",
+    backgroundColor: "#4CAF50",
     borderRadius: 8,
     padding: 8,
     marginVertical: 5,
-    maxWidth: '70%',
+    maxWidth: "70%",
   },
   otherMessage: {
-    alignSelf: 'flex-start',
-    backgroundColor: '#2196F3',
+    alignSelf: "flex-start",
+    backgroundColor: "#2196F3",
     borderRadius: 8,
     padding: 8,
     marginVertical: 5,
-    maxWidth: '70%',
+    maxWidth: "70%",
   },
   messageText: {
-    color: '#fff',
+    color: "#fff",
   },
   inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     borderTopWidth: 1,
-    borderTopColor: '#ccc',
+    borderTopColor: "#ccc",
     padding: 10,
   },
   input: {
     flex: 1,
     height: 40,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     borderRadius: 20,
     paddingHorizontal: 15,
     marginRight: 10,
   },
   sendButton: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: "#4CAF50",
     borderRadius: 20,
     paddingVertical: 10,
     paddingHorizontal: 15,
   },
   sendButtonText: {
-    color: '#fff',
+    color: "#fff",
   },
 });
 
