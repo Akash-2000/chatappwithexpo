@@ -10,23 +10,24 @@ import {
 } from "react-native";
 
 import { io } from "socket.io-client";
+import socketRef from "../utils/socket";
 
 const ChatScreen = ({ route }) => {
-  const { name, room } = route.params;
-  console.log(name, room);
+  const { name, room, id, reciverId } = route.params;
+  console.log("hello data", name, room, id);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [typername, settypername] = useState(null);
 
-  const socketRef = useRef(null);
+  //const socketRef = useRef(null);
   let activityTimer = useRef(null);
 
   useEffect(() => {
     const backAction = () => {
       console.log("back pressed");
-      console.log(socketRef.current);
-      if (socketRef.current) {
-        socketRef.current.emit("forcedisconnect");
+      console.log(socketRef);
+      if (socketRef) {
+        socketRef.emit("forcedisconnect");
         console.log(" pressed");
       }
       return true;
@@ -41,19 +42,20 @@ const ChatScreen = ({ route }) => {
   }, []);
 
   useEffect(() => {
-    socketRef.current = io("ws://192.168.1.18:3500");
+    // socketRef = io("ws://192.168.1.15:3500");
 
-    // socketRef.current.on('connection', () => {
+    // socketRef.on('connection', () => {
     //     console.log('Connected to server');
     //   });
 
-    console.log(socketRef.current);
-    socketRef.current.emit("enterRoom", {
+    console.log(socketRef);
+    socketRef.emit("enterRoom", {
       name: name,
       room: room,
+      id: id,
     });
 
-    socketRef.current.on("message", (data) => {
+    socketRef.on("message", (data) => {
       if (data.name != "Admin") {
         setMessages((prevMessages) => [
           ...prevMessages,
@@ -65,7 +67,7 @@ const ChatScreen = ({ route }) => {
       console.log("Received message:", data);
     });
 
-    socketRef.current.on("activity", (name) => {
+    socketRef.on("activity", (name) => {
       settypername(name);
       clearTimeout(activityTimer);
       activityTimer = setTimeout(() => {
@@ -75,18 +77,21 @@ const ChatScreen = ({ route }) => {
 
     // Disconnect when the component unmounts
     return () => {
-      if (socketRef.current) {
-        socketRef.current.on("disconnect");
+      if (socketRef) {
+        socketRef.on("disconnect");
       }
     };
   }, []);
 
   const handleSend = () => {
     if (newMessage.trim() !== "") {
-      if (socketRef.current) {
-        socketRef.current.emit("message", {
+      if (socketRef) {
+        socketRef.emit("message", {
           name: name,
           text: newMessage,
+          id: id,
+          reciever: reciverId,
+          room: room,
         });
       }
       setNewMessage("");
@@ -117,7 +122,10 @@ const ChatScreen = ({ route }) => {
           onChangeText={(text) => {
             setNewMessage(text);
 
-            socketRef.current.emit("activity", name);
+            socketRef.emit("activity", {
+              name: name,
+              id: id,
+            });
           }}
         />
 
