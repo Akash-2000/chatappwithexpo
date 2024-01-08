@@ -42,7 +42,7 @@ const ChatScreen = ({ route }) => {
   }, []);
 
   useEffect(() => {
-    // socketRef = io("ws://192.168.1.15:3500");
+    // socketRef = io("ws://192.168.1.12:3500");
 
     // socketRef.on('connection', () => {
     //     console.log('Connected to server');
@@ -86,6 +86,7 @@ const ChatScreen = ({ route }) => {
   const handleSend = () => {
     if (newMessage.trim() !== "") {
       if (socketRef) {
+        console.log("the room value is", room);
         socketRef.emit("message", {
           name: name,
           text: newMessage,

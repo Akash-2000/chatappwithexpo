@@ -35,7 +35,7 @@ export default function Login({ navigation }) {
         password: credentials.password,
       };
       const response = await axios.post(
-        "http://192.168.1.15:3500/api/auth/login",
+        "http://192.168.1.12:3500/api/auth/login",
         body
       );
       if (response.status == 200) {

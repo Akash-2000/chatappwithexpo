@@ -16,7 +16,7 @@
 //   const socketRef = useRef(null);
 
 //   //   useEffect(() => {
-//   //     socketRef.current = io("ws://192.168.1.15:3500");
+//   //     socketRef.current = io("ws://192.168.1.12:3500");
 
 //   //     socketRef.current.on("message", (data) => {
 //   //       console.log("messae event is triggered");
@@ -38,7 +38,7 @@
 //     console.log(body);
 //     try {
 //       const response = await axios.post(
-//         "http://192.168.1.15:3500/api/auth/login",
+//         "http://192.168.1.12:3500/api/auth/login",
 //         body,
 //         {
 //           headers: {
@@ -158,7 +158,7 @@ export default function RoomCreation({ navigation }) {
   const getAllusers = async () => {
     try {
       const response = await axios.get(
-        "http://192.168.1.15:3500/api/auth/getAll"
+        "http://192.168.1.12:3500/api/auth/getAll"
       );
 
       if (response.status == 200) {
@@ -183,7 +183,7 @@ export default function RoomCreation({ navigation }) {
         reciverId: reciver,
       };
       const createdId = await axios.post(
-        "http://192.168.1.15:3500/api/room/createRoom",
+        "http://192.168.1.12:3500/api/room/createRoom",
         body
       );
 
