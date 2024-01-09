@@ -12,7 +12,7 @@ import {
 import { io } from "socket.io-client";
 import socketRef from "../utils/socket";
 
-const ChatScreen = ({ route }) => {
+const ChatScreen = ({ route, navigation }) => {
   const { name, room, id, reciverId } = route.params;
   console.log("hello data", name, room, id);
   const [messages, setMessages] = useState([]);
@@ -23,22 +23,13 @@ const ChatScreen = ({ route }) => {
   let activityTimer = useRef(null);
 
   useEffect(() => {
-    const backAction = () => {
-      console.log("back pressed");
-      console.log(socketRef);
-      if (socketRef) {
-        socketRef.emit("forcedisconnect");
-        console.log(" pressed");
-      }
-      return true;
-    };
-
-    const backHandler = BackHandler.addEventListener(
-      "hardwareBackPress",
-      backAction
-    );
-
-    return () => backHandler.remove();
+    const unsubscribe = navigation.addListener("beforeRemove", (e) => {
+      e.preventDefault();
+      unsubscribe();
+      socketRef.emit("exitRoom", {
+        id: id,
+      });
+    });
   }, []);
 
   useEffect(() => {

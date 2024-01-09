@@ -7,7 +7,9 @@ import {
   Text,
   StatusBar,
   TouchableOpacity,
+  Alert,
 } from "react-native";
+import { useSelector } from "react-redux";
 import socketRef from "../utils/socket";
 
 const DATA = [
@@ -38,10 +40,13 @@ const Item = ({ title, navigation }) => (
 );
 
 const RoomList = ({ navigation }) => {
+  const state = useSelector((state) => state.user);
+  console.log(state);
   useEffect(() => {
-    socketRef.emit("getRoomList", "Ak ");
     socketRef.on("getRoomList", (data) => {
+      console.log("changes on the getRoomList");
       console.log(data);
+      Alert.alert("your chat is going to refresh!");
     });
   }, [socketRef]);
 
