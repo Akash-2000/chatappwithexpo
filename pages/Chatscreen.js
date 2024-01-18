@@ -7,6 +7,7 @@ import {
   StyleSheet,
   ScrollView,
   BackHandler,
+  Alert,
 } from "react-native";
 
 import { io } from "socket.io-client";
@@ -33,7 +34,7 @@ const ChatScreen = ({ route, navigation }) => {
   }, []);
 
   useEffect(() => {
-    // socketRef = io("ws://192.168.1.12:3500");
+    // socketRef = io("ws://192.168.1.26:3500");
 
     // socketRef.on('connection', () => {
     //     console.log('Connected to server');
@@ -60,6 +61,7 @@ const ChatScreen = ({ route, navigation }) => {
 
     socketRef.on("activity", (name) => {
       settypername(name);
+      Alert.alert("hii");
       clearTimeout(activityTimer);
       activityTimer = setTimeout(() => {
         settypername(null);
@@ -83,6 +85,10 @@ const ChatScreen = ({ route, navigation }) => {
           text: newMessage,
           id: id,
           reciever: reciverId,
+          room: room,
+        });
+        socketRef.emit("getRoomList", {
+          senderId: reciverId,
           room: room,
         });
       }

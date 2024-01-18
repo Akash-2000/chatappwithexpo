@@ -43,10 +43,14 @@ const RoomList = ({ navigation }) => {
   const state = useSelector((state) => state.user);
   console.log(state);
   useEffect(() => {
-    socketRef.on("getRoomList", (data) => {
-      console.log("changes on the getRoomList");
-      console.log(data);
-      Alert.alert("your chat is going to refresh!");
+    // socketRef.on("getRoomList", (data) => {
+    //   console.log("changes on the getRoomList");
+    //   console.log(data);
+    //   Alert.alert("your chat is going to refresh!");
+    // });
+
+    socketRef.on("getRoomList", (name) => {
+      Alert.alert("this Room list is typing");
     });
   }, [socketRef]);
 
