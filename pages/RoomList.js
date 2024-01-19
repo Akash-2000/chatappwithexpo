@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { useSelector } from "react-redux";
 import socketRef from "../utils/socket";
+import axios from "axios";
 
 const DATA = [
   {
@@ -42,12 +43,23 @@ const Item = ({ title, navigation }) => (
 const RoomList = ({ navigation }) => {
   const state = useSelector((state) => state.user);
   console.log(state);
+
+  async function getMessagae() {
+    try {
+      const body = {
+        id: state.userid,
+      };
+      const response = await axios.post(
+        "http://192.168.1.26:3500/api/msg/getMessages",
+        body
+      );
+      console.log(response.data);
+    } catch (error) {
+      console.warn(error);
+    }
+  }
   useEffect(() => {
-    // socketRef.on("getRoomList", (data) => {
-    //   console.log("changes on the getRoomList");
-    //   console.log(data);
-    //   Alert.alert("your chat is going to refresh!");
-    // });
+    getMessagae();
 
     socketRef.on("getRoomList", (name) => {
       Alert.alert("this Room list is typing");

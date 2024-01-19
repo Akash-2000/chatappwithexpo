@@ -27,8 +27,9 @@ const ChatScreen = ({ route, navigation }) => {
     const unsubscribe = navigation.addListener("beforeRemove", (e) => {
       e.preventDefault();
       unsubscribe();
-      socketRef.emit("exitRoom", {
+      socketRef.emit("leaveRoom", {
         id: id,
+        room: room,
       });
     });
   }, []);
@@ -43,6 +44,11 @@ const ChatScreen = ({ route, navigation }) => {
     console.log(socketRef);
     socketRef.emit("enterRoom", {
       name: name,
+      room: room,
+      id: id,
+    });
+
+    socketRef.emit("addSocketId", {
       room: room,
       id: id,
     });
