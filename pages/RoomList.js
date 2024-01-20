@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   SafeAreaView,
   View,
@@ -44,6 +44,8 @@ const RoomList = ({ navigation }) => {
   const state = useSelector((state) => state.user);
   console.log(state);
 
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState([]);
   async function getMessagae() {
     try {
       const body = {
@@ -53,7 +55,10 @@ const RoomList = ({ navigation }) => {
         "http://192.168.1.26:3500/api/msg/getMessages",
         body
       );
-      console.log(response.data);
+      console.log(response.data.data);
+
+      setData([response.data.data]);
+      setLoading(false);
     } catch (error) {
       console.warn(error);
     }
@@ -66,6 +71,14 @@ const RoomList = ({ navigation }) => {
     });
   }, [socketRef]);
 
+  if (loading) {
+    return (
+      <View>
+        <Text>Loading...</Text>
+      </View>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.buttonView}>
@@ -77,9 +90,9 @@ const RoomList = ({ navigation }) => {
         </TouchableOpacity>
       </View>
       <FlatList
-        data={DATA}
+        data={data}
         renderItem={({ item }) => (
-          <Item title={item.title} navigation={navigation} />
+          <Item title={item.Roomname} navigation={navigation} />
         )}
         keyExtractor={(item) => item.id}
       />
