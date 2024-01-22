@@ -35,7 +35,7 @@ const ChatScreen = ({ route, navigation }) => {
   }, []);
 
   useEffect(() => {
-    // socketRef = io("ws://192.168.1.26:3500");
+    // socketRef = io("ws://192.168.1.30:3500");
 
     // socketRef.on('connection', () => {
     //     console.log('Connected to server');

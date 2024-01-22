@@ -28,36 +28,53 @@ const DATA = [
   },
 ];
 
-const Item = ({ title, navigation }) => (
+const Item = ({ title, navigation, latestMessage }) => (
   <View style={styles.item}>
     <TouchableOpacity
-      onPress={() => {
-        navigation.navigate("chat");
-      }}
+    // onPress={() =>
+    //   navigation.navigate("chat", {
+    //     name: state.username,
+    //     room: createdId.data.data,
+    //     id: sender,
+    //     reciverId: reciver,
+    //   })
+    // }
     >
       <Text style={styles.title}>{title}</Text>
+
+      <Text>{latestMessage}</Text>
     </TouchableOpacity>
   </View>
 );
 
-const RoomList = ({ navigation }) => {
+const RoomList = ({ navigation, route }) => {
   const state = useSelector((state) => state.user);
   console.log(state);
 
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState([]);
+  const [nodata, setnodata] = useState(false);
+
   async function getMessagae() {
     try {
       const body = {
         id: state.userid,
       };
       const response = await axios.post(
-        "http://192.168.1.26:3500/api/msg/getMessages",
+        "http://192.168.1.30:3500/api/msg/getMessages",
         body
       );
-      console.log(response.data.data);
+      console.log("Data from the user", response.data.data);
+      const sortedData = response.data.data.sort(
+        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+      );
 
-      setData([response.data.data]);
+      console.log(sortedData);
+      if (response.data.data === null) {
+        setnodata(true);
+      } else {
+        setData(response.data.data);
+      }
       setLoading(false);
     } catch (error) {
       console.warn(error);
@@ -65,10 +82,6 @@ const RoomList = ({ navigation }) => {
   }
   useEffect(() => {
     getMessagae();
-
-    socketRef.on("getRoomList", (name) => {
-      Alert.alert("this Room list is typing");
-    });
   }, [socketRef]);
 
   if (loading) {
@@ -76,6 +89,22 @@ const RoomList = ({ navigation }) => {
       <View>
         <Text>Loading...</Text>
       </View>
+    );
+  }
+
+  if (nodata) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.buttonView}>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => navigation.navigate("create")}
+          >
+            <Text>Create chat</Text>
+          </TouchableOpacity>
+        </View>
+        <Text>No data..</Text>
+      </SafeAreaView>
     );
   }
 
@@ -89,10 +118,16 @@ const RoomList = ({ navigation }) => {
           <Text>Create chat</Text>
         </TouchableOpacity>
       </View>
+      {console.log(data)}
       <FlatList
         data={data}
         renderItem={({ item }) => (
-          <Item title={item.Roomname} navigation={navigation} />
+          <Item
+            title={item.Roomname}
+            name={state.username}
+            navigation={navigation}
+            latestMessage={item.latestmessage}
+          />
         )}
         keyExtractor={(item) => item.id}
       />
