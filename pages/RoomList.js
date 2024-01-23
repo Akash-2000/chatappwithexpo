@@ -61,28 +61,28 @@ const RoomList = ({ navigation, route }) => {
         id: state.userid,
       };
       const response = await axios.post(
-        "http://192.168.1.30:3500/api/msg/getMessages",
+        "http://192.168.1.32:3500/api/msg/getMessages",
         body
       );
-      console.log("Data from the user", response.data.data);
       const sortedData = response.data.data.sort(
-        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)
       );
 
       console.log(sortedData);
-      if (response.data.data === null) {
+      if (sortedData === null) {
         setnodata(true);
       } else {
-        setData(response.data.data);
+        setData(sortedData);
       }
       setLoading(false);
     } catch (error) {
       console.warn(error);
     }
   }
+
   useEffect(() => {
     getMessagae();
-  }, [socketRef]);
+  }, []);
 
   if (loading) {
     return (

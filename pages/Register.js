@@ -28,7 +28,7 @@ export default function Register({ navigation }) {
         password: credentials.password,
       };
       const response = await axios.post(
-        "http://192.168.1.30:3500/api/auth/register",
+        "http://192.168.1.32:3500/api/auth/register",
         body
       );
       console.log(response.data.message);
