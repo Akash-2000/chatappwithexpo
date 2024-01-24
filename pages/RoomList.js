@@ -28,7 +28,7 @@ const DATA = [
   },
 ];
 
-const Item = ({ title, navigation, latestMessage }) => (
+const Item = ({ title, navigation, latestMessage, unRead }) => (
   <View style={styles.item}>
     <TouchableOpacity
     // onPress={() =>
@@ -41,6 +41,7 @@ const Item = ({ title, navigation, latestMessage }) => (
     // }
     >
       <Text style={styles.title}>{title}</Text>
+      <Text>{unRead}</Text>
 
       <Text>{latestMessage}</Text>
     </TouchableOpacity>
@@ -61,7 +62,7 @@ const RoomList = ({ navigation, route }) => {
         id: state.userid,
       };
       const response = await axios.post(
-        "http://192.168.1.32:3500/api/msg/getMessages",
+        "http://192.168.1.17:3500/api/msg/getMessages",
         body
       );
       const sortedData = response.data.data.sort(
@@ -127,6 +128,7 @@ const RoomList = ({ navigation, route }) => {
             name={state.username}
             navigation={navigation}
             latestMessage={item.latestmessage}
+            unRead={item.unreadCount}
           />
         )}
         keyExtractor={(item) => item.id}
