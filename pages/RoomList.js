@@ -54,6 +54,7 @@ const RoomList = ({ navigation, route }) => {
 
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState([]);
+  const [unreadData, setunreadData] = useState([]);
   const [nodata, setnodata] = useState(false);
 
   async function getMessagae() {
@@ -70,11 +71,24 @@ const RoomList = ({ navigation, route }) => {
       );
 
       console.log(sortedData);
+      const unreadData = sortedData.reduce((acc, curr) => {
+        if (curr.unreadCount > 0) {
+          return acc.concat({
+            roomname: curr.Roomname,
+            count: curr.unreadCount,
+          });
+        } else {
+          return acc;
+        }
+      }, []);
+      console.log("unReadData", unreadData);
+
       if (sortedData === null) {
         setnodata(true);
       } else {
         setData(sortedData);
       }
+      setunreadData(unreadData);
       setLoading(false);
     } catch (error) {
       console.warn(error);
@@ -84,6 +98,14 @@ const RoomList = ({ navigation, route }) => {
   useEffect(() => {
     getMessagae();
   }, []);
+
+  useEffect(() => {
+    socketRef.on("updateRoomlist", (data) => {
+      Alert.alert("update the data");
+      console.log(data);
+    });
+    console.log("message update");
+  }, [socketRef]);
 
   if (loading) {
     return (
@@ -99,7 +121,11 @@ const RoomList = ({ navigation, route }) => {
         <View style={styles.buttonView}>
           <TouchableOpacity
             style={styles.button}
-            onPress={() => navigation.navigate("create")}
+            onPress={() =>
+              navigation.navigate("create", {
+                unreadData: unreadData,
+              })
+            }
           >
             <Text>Create chat</Text>
           </TouchableOpacity>
@@ -114,7 +140,11 @@ const RoomList = ({ navigation, route }) => {
       <View style={styles.buttonView}>
         <TouchableOpacity
           style={styles.button}
-          onPress={() => navigation.navigate("create")}
+          onPress={() =>
+            navigation.navigate("create", {
+              unreadData: unreadData,
+            })
+          }
         >
           <Text>Create chat</Text>
         </TouchableOpacity>

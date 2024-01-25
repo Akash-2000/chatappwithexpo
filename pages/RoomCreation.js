@@ -150,8 +150,10 @@ const Item = ({ title, id, senderId, onNavigate }) => (
   </View>
 );
 
-export default function RoomCreation({ navigation }) {
+export default function RoomCreation({ navigation, route }) {
   const [datas, setData] = useState(DATA);
+
+  console.log("dataof the unRead", route.params);
 
   const state = useSelector((state) => state.user);
   console.log(state);
@@ -193,6 +195,7 @@ export default function RoomCreation({ navigation }) {
         room: createdId.data.data,
         id: sender,
         reciverId: reciver,
+        unread: route.params.unreadData,
       });
     } catch (error) {
       console.error(error);
